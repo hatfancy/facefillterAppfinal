@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Face Filter App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Real-Time AR Face Filters</h1>
+            <p>Select a filter and see it applied instantly to your face!</p>
+        </header>
+
+        <main>
+            <div class="video-container">
+                <img id="videoStream" src="/video_feed" alt="Live webcam feed" />
+            </div>
+
+            <div class="controls">
+                <button class="filter-btn active" data-filter="none" id="btn-none">No Filter</button>
+                <button class="filter-btn" data-filter="smiley" id="btn-smiley">😊 Smiley</button>
+                <button class="filter-btn" data-filter="wink" id="btn-wink">😉 Wink</button>
+                <button class="filter-btn" data-filter="cool" id="btn-cool">😎 Cool Guy</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
