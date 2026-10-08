@@ -599,27 +599,24 @@ AI_FILTERS = {
 }
 
 
-# ── MJPEG frame generator ──────────────────────────────────────────────────
-def generate_frames():
+# ── Routes ──────────────────────────────────────────────────────────────────
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/process_frame', methods=['POST'])
+def process_frame():
     global current_filter, latest_frame
+    
+    data = request.get_json()
+    if not data or 'image' not in data:
+        return jsonify({"status": "error", "message": "No image data"}), 400
 
-    camera = cv2.VideoCapture(0)
-    if not camera.isOpened():
-        print("ERROR: Could not open webcam.")
-        return
-
-    camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-
-    print("Webcam opened successfully. Streaming...")
-
-    while True:
-        success, frame = camera.read()
-        if not success:
-            break
-
-        # Flip horizontally so it feels like a mirror
-        frame = cv2.flip(frame, 1)
+    try:
+        # Decode base64 image
+        img_data = data['image'].split(',')[1]
+        nparr = np.frombuffer(base64.b64decode(img_data), np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
         # ── Low-light adaptive enhancement ──
         frame = enhance_low_light(frame)
@@ -653,26 +650,15 @@ def generate_frames():
             latest_frame = frame.copy()
 
         _, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
-        jpg_bytes = buffer.tobytes()
+        jpg_b64 = base64.b64encode(buffer.tobytes()).decode('utf-8')
 
-        yield (
-            b'--frame\r\n'
-            b'Content-Type: image/jpeg\r\n\r\n' + jpg_bytes + b'\r\n'
-        )
-
-    camera.release()
-
-# ── Routes ──────────────────────────────────────────────────────────────────
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/video_feed')
-def video_feed():
-    return Response(
-        generate_frames(),
-        mimetype='multipart/x-mixed-replace; boundary=frame'
-    )
+        return jsonify({
+            "status": "ok",
+            "image": f"data:image/jpeg;base64,{jpg_b64}"
+        })
+    except Exception as e:
+        print("Error processing frame:", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/set_filter', methods=['POST'])
 def set_filter():

@@ -24,6 +24,66 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentFilter = 'none';
     let lastCapturedImage = null;
 
+    // ── Camera capture ──
+    const hiddenVideo = document.getElementById('hiddenVideo');
+    const hiddenCanvas = document.getElementById('hiddenCanvas');
+    const videoStream = document.getElementById('videoStream');
+    let isProcessing = false;
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+            .then(stream => {
+                hiddenVideo.srcObject = stream;
+                hiddenVideo.play();
+                requestAnimationFrame(processVideoFrame);
+            })
+            .catch(err => {
+                console.error("Camera error:", err);
+                filterLabel.textContent = "Camera Error: " + err.message;
+            });
+    } else {
+        filterLabel.textContent = "Camera API not supported";
+    }
+
+    function processVideoFrame() {
+        if (hiddenVideo.readyState === hiddenVideo.HAVE_ENOUGH_DATA) {
+            if (!isProcessing) {
+                isProcessing = true;
+                hiddenCanvas.width = hiddenVideo.videoWidth;
+                hiddenCanvas.height = hiddenVideo.videoHeight;
+                const ctx = hiddenCanvas.getContext('2d');
+                
+                // Flip horizontally
+                ctx.translate(hiddenCanvas.width, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(hiddenVideo, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
+                
+                const dataURL = hiddenCanvas.toDataURL('image/jpeg', 0.8);
+                
+                fetch('/process_frame', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: dataURL })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        videoStream.src = data.image;
+                    }
+                })
+                .catch(err => console.error(err))
+                .finally(() => {
+                    isProcessing = false;
+                    requestAnimationFrame(processVideoFrame);
+                });
+            } else {
+                requestAnimationFrame(processVideoFrame);
+            }
+        } else {
+            requestAnimationFrame(processVideoFrame);
+        }
+    }
+
     // ── Filter names for the overlay label ──
     const filterNames = {
         'none':       'No Filter',

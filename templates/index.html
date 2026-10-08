@@ -37,11 +37,13 @@
             <main>
                 <div class="video-wrapper">
                     <div class="video-container" id="video-container">
-                        <img id="videoStream" src="/video_feed" alt="Live webcam feed" />
+                        <video id="hiddenVideo" autoplay playsinline style="display:none;"></video>
+                        <canvas id="hiddenCanvas" style="display:none;"></canvas>
+                        <img id="videoStream" alt="Live webcam feed" />
                         <div class="video-badge" id="live-badge">
                             <span class="badge-dot"></span> LIVE
                         </div>
-                        <div class="filter-label" id="filter-label">No Filter</div>
+                        <div class="filter-label" id="filter-label">Loading Camera...</div>
                     </div>
 
                     <!-- Capture Button -->
