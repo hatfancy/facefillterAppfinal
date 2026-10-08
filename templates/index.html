@@ -3,29 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Face Filter App</title>
+    <title>FaceFilter Hub – AR Face Filters & Gallery</title>
+    <meta name="description" content="Real-time AR face filter hub with AI-powered creative effects, emoji overlays, capture and share your photos in the gallery.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- ── Tab Navigation ── -->
+    <nav class="tab-nav" id="tab-nav">
+        <button class="tab-btn active" data-tab="camera" id="tab-camera">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Camera
+        </button>
+        <button class="tab-btn" data-tab="gallery" id="tab-gallery">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Gallery Hub
+            <span class="gallery-count" id="gallery-count">0</span>
+        </button>
+    </nav>
+
     <div class="container">
-        <header>
-            <h1>Real-Time AR Face Filters</h1>
-            <p>Select a filter and see it applied instantly to your face!</p>
-        </header>
+        <!-- ═══════════════════════════════════════════════════════════════
+             CAMERA TAB
+             ═══════════════════════════════════════════════════════════════ -->
+        <div class="tab-panel active" id="panel-camera">
+            <header>
+                <h1>FaceFilter Hub</h1>
+                <p>Choose a filter, capture the moment, post to the gallery!</p>
+            </header>
 
-        <main>
-            <div class="video-container">
-                <img id="videoStream" src="/video_feed" alt="Live webcam feed" />
+            <main>
+                <div class="video-wrapper">
+                    <div class="video-container" id="video-container">
+                        <img id="videoStream" src="/video_feed" alt="Live webcam feed" />
+                        <div class="video-badge" id="live-badge">
+                            <span class="badge-dot"></span> LIVE
+                        </div>
+                        <div class="filter-label" id="filter-label">No Filter</div>
+                    </div>
+
+                    <!-- Capture Button -->
+                    <button class="capture-btn" id="btn-capture" title="Capture screenshot">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                        <span>Capture</span>
+                    </button>
+                </div>
+
+                <!-- ── Filter Selection Menu ── -->
+                <div class="filter-menu" id="filter-menu">
+
+                    <!-- Emoji Overlays -->
+                    <div class="filter-category">
+                        <h3 class="category-title">
+                            <span class="category-icon">🎭</span> Emoji Overlays
+                        </h3>
+                        <div class="filter-grid">
+                            <button class="filter-btn active" data-filter="none" id="btn-none">
+                                <span class="filter-icon">🚫</span>
+                                <span class="filter-name">No Filter</span>
+                            </button>
+                            <button class="filter-btn" data-filter="smiley" id="btn-smiley">
+                                <span class="filter-icon">😊</span>
+                                <span class="filter-name">Smiley</span>
+                            </button>
+                            <button class="filter-btn" data-filter="wink" id="btn-wink">
+                                <span class="filter-icon">😉</span>
+                                <span class="filter-name">Wink</span>
+                            </button>
+                            <button class="filter-btn" data-filter="cool" id="btn-cool">
+                                <span class="filter-icon">😎</span>
+                                <span class="filter-name">Cool Guy</span>
+                            </button>
+                            <button class="filter-btn" data-filter="heart_eyes" id="btn-heart-eyes">
+                                <span class="filter-icon">😍</span>
+                                <span class="filter-name">Heart Eyes</span>
+                            </button>
+                            <button class="filter-btn" data-filter="clown" id="btn-clown">
+                                <span class="filter-icon">🤡</span>
+                                <span class="filter-name">Clown</span>
+                            </button>
+                            <button class="filter-btn" data-filter="ghost" id="btn-ghost">
+                                <span class="filter-icon">👻</span>
+                                <span class="filter-name">Ghost</span>
+                            </button>
+                            <button class="filter-btn" data-filter="pumpkin" id="btn-pumpkin">
+                                <span class="filter-icon">🎃</span>
+                                <span class="filter-name">Pumpkin</span>
+                            </button>
+                            <button class="filter-btn" data-filter="devil" id="btn-devil">
+                                <span class="filter-icon">😈</span>
+                                <span class="filter-name">Devil</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI Creative Effects -->
+                    <div class="filter-category">
+                        <h3 class="category-title">
+                            <span class="category-icon">🤖</span> AI Creative Effects
+                        </h3>
+                        <div class="filter-grid">
+                            <button class="filter-btn ai-filter" data-filter="pixel_art" id="btn-pixel-art">
+                                <span class="filter-icon">👾</span>
+                                <span class="filter-name">Pixel Art</span>
+                                <span class="filter-tag">AI</span>
+                            </button>
+                            <button class="filter-btn ai-filter" data-filter="neon_glow" id="btn-neon-glow">
+                                <span class="filter-icon">💜</span>
+                                <span class="filter-name">Neon Glow</span>
+                                <span class="filter-tag">AI</span>
+                            </button>
+                            <button class="filter-btn ai-filter" data-filter="sketch" id="btn-sketch">
+                                <span class="filter-icon">✏️</span>
+                                <span class="filter-name">Sketch</span>
+                                <span class="filter-tag">AI</span>
+                            </button>
+                            <button class="filter-btn ai-filter" data-filter="swirl" id="btn-swirl">
+                                <span class="filter-icon">🌀</span>
+                                <span class="filter-name">Swirl</span>
+                                <span class="filter-tag">AI</span>
+                            </button>
+                            <button class="filter-btn ai-filter" data-filter="thermal" id="btn-thermal">
+                                <span class="filter-icon">🔥</span>
+                                <span class="filter-name">Thermal</span>
+                                <span class="filter-tag">AI</span>
+                            </button>
+                            <button class="filter-btn ai-filter" data-filter="glitch" id="btn-glitch">
+                                <span class="filter-icon">📺</span>
+                                <span class="filter-name">Glitch</span>
+                                <span class="filter-tag">AI</span>
+                            </button>
+                            <button class="filter-btn ai-filter" data-filter="pop_art" id="btn-pop-art">
+                                <span class="filter-icon">🎨</span>
+                                <span class="filter-name">Pop Art</span>
+                                <span class="filter-tag">AI</span>
+                            </button>
+                            <button class="filter-btn ai-filter" data-filter="mirror" id="btn-mirror">
+                                <span class="filter-icon">🪞</span>
+                                <span class="filter-name">Mirror</span>
+                                <span class="filter-tag">AI</span>
+                            </button>
+                            <button class="filter-btn ai-filter" data-filter="emboss" id="btn-emboss">
+                                <span class="filter-icon">🗿</span>
+                                <span class="filter-name">Emboss</span>
+                                <span class="filter-tag">AI</span>
+                            </button>
+                            <button class="filter-btn ai-filter" data-filter="watercolor" id="btn-watercolor">
+                                <span class="filter-icon">🖌️</span>
+                                <span class="filter-name">Watercolor</span>
+                                <span class="filter-tag">AI</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer>
+                <p class="footer-text">🔦 Low-light mode activates automatically • Powered by OpenCV AI</p>
+            </footer>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             GALLERY HUB TAB
+             ═══════════════════════════════════════════════════════════════ -->
+        <div class="tab-panel" id="panel-gallery">
+            <header>
+                <h1>Gallery Hub</h1>
+                <p>Your captured moments — browse, like, and download!</p>
+            </header>
+
+            <div class="gallery-grid" id="gallery-grid">
+                <!-- Posts are rendered dynamically by JS -->
             </div>
 
-            <div class="controls">
-                <button class="filter-btn active" data-filter="none" id="btn-none">No Filter</button>
-                <button class="filter-btn" data-filter="smiley" id="btn-smiley">😊 Smiley</button>
-                <button class="filter-btn" data-filter="wink" id="btn-wink">😉 Wink</button>
-                <button class="filter-btn" data-filter="cool" id="btn-cool">😎 Cool Guy</button>
+            <div class="gallery-empty" id="gallery-empty">
+                <div class="empty-icon">📸</div>
+                <h3>No photos yet</h3>
+                <p>Go to Camera, pick a filter, capture a photo and post it here!</p>
             </div>
-        </main>
+        </div>
     </div>
+
+    <!-- ── Capture + Post Modal ── -->
+    <div class="capture-modal" id="capture-modal">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-content">
+            <h2>📸 Screenshot Captured!</h2>
+            <div class="modal-image-container">
+                <img id="captured-image" alt="Captured screenshot" />
+            </div>
+            <div class="modal-caption-row">
+                <input type="text" id="caption-input" class="caption-input"
+                       placeholder="Add a caption…" maxlength="120" autocomplete="off" />
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn post-btn" id="post-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Post to Gallery
+                </button>
+                <a id="download-btn" class="modal-btn download-btn" download="face_filter_capture.jpg">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                </a>
+                <button class="modal-btn close-btn" id="modal-close-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Toast notification ── -->
+    <div class="toast" id="toast"></div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
